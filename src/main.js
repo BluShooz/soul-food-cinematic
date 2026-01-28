@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import './style.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -120,20 +121,34 @@ function init() {
     scale: 1.5, // Continue growing as they fade
     filter: 'blur(10px)',
     duration: 3
-  }, 4); // Start after hero is mostly visible
+  }, 5); // Start after hero is mostly visible
 
   // --- Phase 4: Final Hero Scale & Text (70% - 100%) ---
   tl.to(heroDish, {
     scale: 1.2,
     filter: 'contrast(1.1)',
     duration: 3
-  }, 5);
+  }, 7);
 
   tl.to(finalText, {
     opacity: 1,
     y: 0,
     duration: 2
-  }, 6); // Final text fades in
+  }, 8); // Final text fades in
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// Preloader Logic
+window.addEventListener('load', () => {
+  const preloader = document.getElementById('preloader');
+  if (preloader) {
+    gsap.to(preloader, {
+      opacity: 0,
+      duration: 0.5,
+      onComplete: () => preloader.remove(),
+    });
+    // Initialize animations after load
+    init();
+  } else {
+    init();
+  }
+});

@@ -24,11 +24,47 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: -1; /* Behind everything */
+  z-index: -1;
+  /* Behind everything */
 }
 
 .scroll-height {
-  height: 400vh; /* Use scroll mapping */
+  height: 600vh;
+  /* Increased for smoother pacing */
+}
+
+/* Preloader */
+.preloader {
+  position: fixed;
+  inset: 0;
+  background-color: #000;
+  z-index: 9999;
+  /* Top level */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-title {
+  font-family: var(--font-serif);
+  color: var(--accent-gold);
+  font-size: 2rem;
+  letter-spacing: 2px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
 }
 
 .stage {
@@ -64,12 +100,14 @@ body {
 
 .hero-dish {
   position: absolute;
-  max-width: 40vw; /* Initial size */
+  max-width: 40vw;
+  /* Initial size */
   width: 500px;
-  opacity: 0; /* Hidden initially or start small */
+  opacity: 0;
+  /* Hidden initially or start small */
   transform: scale(0.5);
   z-index: 20;
-  filter: drop-shadow(0 20px 50px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.8));
 }
 
 .ingredients-container {
@@ -81,11 +119,13 @@ body {
 
 .ingredient {
   position: absolute;
-  width: 150px; /* Adjust based on image resolution */
+  width: 150px;
+  /* Adjust based on image resolution */
   max-width: 20vw;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) scale(0); /* Start hidden/small in center */
+  transform: translate(-50%, -50%) scale(0);
+  /* Start hidden/small in center */
   opacity: 0;
   z-index: 15;
 }
