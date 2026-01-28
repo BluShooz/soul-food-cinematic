@@ -13,19 +13,16 @@ function init() {
   const particlesContainer = document.querySelector('#particles');
 
   // --- Particle System ---
-  const particleCount = 40;
+  const particleCount = 100; // Increased for "Cocoa Dust" density
   for (let i = 0; i < particleCount; i++) {
     const p = document.createElement('div');
     p.classList.add('particle');
-    // Random initial position (center-ish)
-    const startX = (Math.random() - 0.5) * 20;
-    const startY = (Math.random() - 0.5) * 20;
 
-    // Style directly for simplicity
+    // Style directly: smaller, golden, subtle
     p.style.cssText = `
       position: absolute;
-      width: ${Math.random() * 6 + 2}px;
-      height: ${Math.random() * 6 + 2}px;
+      width: ${Math.random() * 4 + 1}px;
+      height: ${Math.random() * 4 + 1}px;
       background: radial-gradient(circle, #ffd700, transparent);
       border-radius: 50%;
       top: 50%;
@@ -33,6 +30,7 @@ function init() {
       transform: translate(-50%, -50%);
       opacity: 0;
       pointer-events: none;
+      filter: blur(1px); /* Softness */
     `;
     particlesContainer.appendChild(p);
   }
@@ -51,11 +49,6 @@ function init() {
     }
   });
 
-  // --- Phase 1: Explosion (0% - 30% of scroll) ---
-  // Animate ingredients OUTWARDS from center
-  // We'll give each ingredient a specific "destination" based on its random-ish position
-
-
 
   // Fade out intro text quickly
   tl.to(introText, {
@@ -64,88 +57,111 @@ function init() {
     duration: 1
   }, 0);
 
-  // --- Phase 2: Hero Reveal (20% - 60%) ---
-  // Overlapping with explosion slightly
 
   // --- Phase 1: The Setup (Dish Visible) ---
-  // Ensure Dish is fully visible at start (initially set by CSS, but good to enforce)
-  gsap.set(heroDish, { scale: 1, opacity: 1, rotation: 0 });
+  gsap.set(heroDish, { scale: 1, opacity: 1, rotation: 0, zIndex: 100 });
+  // Ingredients start "inside" or slightly behind the dish
+  gsap.set(ingredients, { scale: 0, opacity: 0, x: 0, y: 0, zIndex: 90 });
 
-  // Ingredients start "inside" the dish (center, scale 0, opacity 0 or 1 behind dish)
-  gsap.set(ingredients, { scale: 0, opacity: 0, x: 0, y: 0 });
+  // --- Animation Sequence ---
 
-  // --- Phase 2: The Explosion (0% - 40% scroll) ---
-  // Dish shakes/scales slightly to anticipate
+  // 1. Anticipation (0% - 5%) - Subtle contraction
   tl.to(heroDish, {
-    scale: 0.9,
-    rotation: -5,
-    duration: 1,
+    scale: 0.95,
+    duration: 0.5,
     ease: 'power1.in'
   }, 0);
 
-  // EXPLOSION! Ingredients fly out
+  // 2. The Explosion (5% - 35%) - Fast burst outwards
   const explosionDestinations = [
-    { x: -50, y: -40, rotate: -45 },
-    { x: 50, y: -45, rotate: 45 },
-    { x: -55, y: 20, rotate: -90 },
-    { x: 60, y: 25, rotate: 90 },
-    { x: -30, y: 55, rotate: -135 },
-    { x: 45, y: 50, rotate: 135 }
+    { x: -60, y: -40, rotate: -60, scale: 1.2 }, // Top Left
+    { x: 60, y: -50, rotate: 60, scale: 0.8 },   // Top Right
+    { x: -70, y: 10, rotate: -120, scale: 1.1 }, // Mid Left
+    { x: 75, y: 20, rotate: 90, scale: 0.9 },    // Mid Right
+    { x: -40, y: 60, rotate: -160, scale: 1.3 }, // Bot Left
+    { x: 50, y: 55, rotate: 140, scale: 1.0 }    // Bot Right
   ];
 
   ingredients.forEach((ing, index) => {
-    const dest = explosionDestinations[index] || { x: (Math.random() - 0.5) * 80, y: (Math.random() - 0.5) * 80, rotate: Math.random() * 360 };
+    const dest = explosionDestinations[index] || { x: (Math.random() - 0.5) * 100, y: (Math.random() - 0.5) * 100, rotate: Math.random() * 360, scale: 1 };
 
+    // Initial burst (fast)
     tl.to(ing, {
-      xPercent: dest.x * 3, // Further distance
-      yPercent: dest.y * 3,
-      scale: 1.5,
-      rotation: dest.rotate + 360, // Spin while exploding
+      xPercent: dest.x * 2.5,
+      yPercent: dest.y * 2.5,
+      rotation: dest.rotate + 180,
+      scale: dest.scale,
       opacity: 1,
-      duration: 3,
-      ease: 'power3.out' // Fast start, slow end (explosive)
-    }, 1); // Start after anticipate
+      duration: 3, // Fast duration relative to scroll
+      ease: 'power3.out'
+    }, 0.5);
+
+    // Depth of field blur based on "depth" (scale)
+    const blurAmount = Math.abs(1 - dest.scale) * 10;
+    if (blurAmount > 2) {
+      tl.to(ing, { filter: `blur(${blurAmount}px)`, duration: 3 }, 0.5);
+    }
   });
 
-  // Particles explode concurrently
+  // Particle Burst (Concurrent with explosion)
   particles.forEach((p, i) => {
-    // ... same particle logic kept mostly ...
     const angle = Math.random() * Math.PI * 2;
-    const velocity = Math.random() * 150 + 50; // Increased velocity
+    const velocity = Math.random() * 200 + 50;
     const endX = Math.cos(angle) * velocity;
     const endY = Math.sin(angle) * velocity;
 
     tl.to(p, {
       xPercent: endX,
       yPercent: endY,
-      opacity: { value: 0, duration: 2.5 },
-      startAt: { opacity: 1, xPercent: 0, yPercent: 0, scale: 0.5 }, // Start at center
+      opacity: { value: 0, duration: 2 },
+      startAt: { opacity: 0.8, xPercent: 0, yPercent: 0, scale: Math.random() * 0.5 },
       scale: 0,
       duration: Math.random() * 2 + 1,
-      ease: 'power4.out'
-    }, 1); // Sync with ingredients
+      ease: 'expo.out'
+    }, 0.5);
   });
 
-  // Main Dish interaction during explosion (Maybe it scales UP to fill gap?)
+  // 3. Suspension (35% - 60%) - The "Hang Time"
+  // Ingredients continue to drift slowly (linear or soft ease) to simulate weightlessness
+  ingredients.forEach((ing, index) => {
+    const dest = explosionDestinations[index] || { x: 0, y: 0, rotate: 0 };
+    tl.to(ing, {
+      xPercent: `+=${dest.x * 0.2}`, // Drift slightly further
+      yPercent: `+=${dest.y * 0.2}`,
+      rotation: `+=${dest.rotate * 0.1}`,
+      duration: 3,
+      ease: 'none' // Linear drift
+    }, 3.5);
+  });
+
+  // 4. Fade & Focus Shift (60% - 80%)
+  tl.to(ingredients, {
+    opacity: 0,
+    filter: 'blur(20px)',
+    scale: '+=0.2',
+    duration: 2
+  }, 6.5);
+
+  // 5. Hero Cinematic Push-in (40% - 100%)
+  // Starts overlapping with suspension, fully takes over
   tl.to(heroDish, {
-    scale: 1.1,
-    rotation: 0,
-    duration: 3,
-    ease: 'elastic.out(1, 0.5)'
-  }, 1);
+    scale: 1.8, // Dramatic zoom
+    yPercent: 10, // Move slightly down to center the best part? or keep centered.
+    rotation: 5, // Subtle tilt
+    duration: 6,
+    filter: 'contrast(1.2) saturate(1.1)', // Enhance visual appeal
+    ease: 'power2.inOut'
+  }, 3);
 
-  // --- Phase 3 & 4: Settle (40% - 100%) ---
-  // Camera zoom in/out or focus change
+  // Text Reveal
+  tl.to(introText, { opacity: 0, scale: 1.5, filter: 'blur(10px)', duration: 1 }, 0.5);
 
-  // Fade out text early
-  tl.to(introText, { opacity: 0, scale: 2, duration: 1 }, 0.5);
-
-  // Final State
   tl.to(finalText, {
     opacity: 1,
     y: 0,
-    duration: 2
-  }, 5);
+    duration: 2,
+    ease: 'power2.out'
+  }, 8);
 }
 
 // Preloader Logic

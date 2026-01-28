@@ -83,8 +83,13 @@ body {
 .atmosphere {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+  background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%);
   z-index: 1;
+}
+
+/* Particle Bloom */
+.particle {
+  box-shadow: 0 0 4px 1px rgba(212, 175, 55, 0.4);
 }
 
 /* Centerpiece */
